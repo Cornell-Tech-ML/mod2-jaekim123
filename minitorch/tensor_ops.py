@@ -28,22 +28,42 @@ class MapProto(Protocol):
 class TensorOps:
     @staticmethod
     def map(fn: Callable[[float], float]) -> MapProto:
-        """Map placeholder"""
-        ...
+        """Map a function over a tensor.
+
+       This method applies a given function to each element of the tensor.
+
+       Args:
+           fn (Callable[[float], float]): A function that takes a float and returns a float.
+
+       Returns:
+           MapProto: A callable that takes a Tensor and an optional output Tensor, returning a new Tensor.
+        """
+        
 
     @staticmethod
     def zip(
         fn: Callable[[float, float], float],
     ) -> Callable[[Tensor, Tensor], Tensor]:
-        """Zip placeholder"""
-        ...
+        """Zip two tensors using a binary function.
+
+       This method applies a given binary function to pairs of elements from two tensors.
+
+       Args:
+           fn (Callable[[float, float], float]): A function that takes two floats and returns a float.
+
+       Returns:
+           Callable[[Tensor, Tensor], Tensor]: A callable that takes two Tensors and returns a new Tensor.
+        """
+        
 
     @staticmethod
     def reduce(
         fn: Callable[[float, float], float], start: float = 0.0
-    ) -> Callable[[Tensor, int], Tensor]: 
+    ) -> Callable[[Tensor, int], Tensor]:
         """
         Reduce the tensor using the specified function.
+
+        This method reduces the tensor along a specified dimension using the provided function
 
         Args:
             fn: A callable that takes two float arguments and returns a float.
@@ -52,11 +72,21 @@ class TensorOps:
         Returns:
             A callable that takes a Tensor and an integer and returns a Tensor.
         """
-        ...
+        
 
     @staticmethod
     def matrix_multiply(a: Tensor, b: Tensor) -> Tensor:
-        """Matrix multiply"""
+        """Perform a matrix multiplication of two tensors.
+
+        This method performs a matrix multiplication of two tensors.
+
+        Args:
+            a (Tensor): The first tensor.
+            b (Tensor): The second tensor.
+
+        Returns:
+            Tensor: The result of the matrix multiplication.
+        """
         raise NotImplementedError("Not implemented in this assignment")
 
     cuda = False
@@ -103,6 +133,13 @@ class SimpleOps(TensorOps):
     @staticmethod
     def map(fn: Callable[[float], float]) -> MapProto:
         """Higher-order tensor map function ::
+            This method applies a given function to each element of a tensor. 
+            
+            Args: 
+                fn (Callable[[float], float]): A function that takes a float and returns a float.
+
+            Returns:
+                MapProto: A callable that takes a Tensor and an optional output Tensor, returning a new Tensor.
 
           fn_map = map(fn)
           fn_map(a, out)
@@ -127,7 +164,7 @@ class SimpleOps(TensorOps):
                    should broadcast with `a`
 
         Returns:
-            new tensor data
+            Tensor: A new tensor with the mapped values. 
         """
         f = tensor_map(fn)
 
@@ -263,35 +300,35 @@ def tensor_map(
         in_shape: Shape,
         in_strides: Strides,
     ) -> None:
-        
+
         out_size: int = 1
         for dim in out_shape:
             out_size *= dim
-        
+
         def get_index(index: List[int], shape: Shape, strides: Strides) -> int:
             storage_index: int = 0
             for i, (idx, stride) in enumerate(zip(index, strides)):
                 storage_index += idx * stride
             return storage_index
-        
+
         def unravel_index(flat_index: int, shape: Shape) -> List[int]:
             idx: List[int] = []
             for dim in reversed(shape):
                 idx.append(flat_index % dim)
                 flat_index //= dim
             return list(reversed(idx))
-        
+
         for i in range(out_size):
             out_idx: List[int] = unravel_index(i, out_shape)
-            
+
             in_idx: List[int] = [
                 0 if in_dim == 1 else out_dim
                 for out_dim, in_dim in zip(out_idx, [1] * (len(out_shape) - len(in_shape)) + list(in_shape))
             ]
-            
+
             in_storage_idx: int = get_index(in_idx, in_shape, in_strides)
             out_storage_idx: int = get_index(out_idx, out_shape, out_strides)
-            
+
             out[out_storage_idx] = fn(in_storage[in_storage_idx])
 
     return _map
@@ -336,41 +373,41 @@ def tensor_zip(
         b_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 2.3.
-               
+
         out_size: int = 1
         for dim in out_shape:
             out_size *= dim
-        
+
         def get_index(index: List[int], shape: Shape, strides: Strides) -> int:
             storage_index: int = 0
             for i, (idx, stride) in enumerate(zip(index, strides)):
                 storage_index += idx * stride
             return storage_index
-        
+
         def unravel_index(flat_index: int, shape: Shape) -> List[int]:
             idx: List[int] = []
             for dim in reversed(shape):
                 idx.append(flat_index % dim)
                 flat_index //= dim
             return list(reversed(idx))
-        
+
         for i in range(out_size):
             out_idx: List[int] = unravel_index(i, out_shape)
-            
+
             a_idx: List[int] = [
                 0 if a_dim == 1 else out_dim
                 for out_dim, a_dim in zip(out_idx, [1] * (len(out_shape) - len(a_shape)) + list(a_shape))
             ]
-            
+
             b_idx: List[int] = [
                 0 if b_dim == 1 else out_dim
                 for out_dim, b_dim in zip(out_idx, [1] * (len(out_shape) - len(b_shape)) + list(b_shape))
             ]
-            
+
             a_storage_idx: int = get_index(a_idx, a_shape, a_strides)
             b_storage_idx: int = get_index(b_idx, b_shape, b_strides)
             out_storage_idx: int = get_index(out_idx, out_shape, out_strides)
-            
+
             out[out_storage_idx] = fn(a_storage[a_storage_idx], b_storage[b_storage_idx])
 
     return _zip

@@ -37,41 +37,46 @@ def index_to_position(index: Index, strides: Strides) -> int:
     storage based on strides.
 
     Args:
-        index : index tuple of ints
-        strides : tensor strides
+        index (Index): A tuple of indices representing the position in each dimension.
+        strides (Strides): A tuple of strides for each dimension, indicating the step size
+                           to move in the storage array for each dimension.
 
     Returns:
-        Position in storage
+        int: The position in the storage array corresponding to the given index.
 
+    Raises:
+        IndexError: If the index is out of bounds for the given strides.
     """
 
     position = 0
     for i, idx in enumerate(index):
+        if idx < 0 or idx >= strides.shape[i]:  # Check for out-of-bounds index
+            raise IndexError(f"Index {idx} is out of bounds for dimension {i} with size {strides.shape[i]}.")
         position += idx * strides[i]
     return position
-
-    # TODO: Implement for Task 2.1.
-    #raise NotImplementedError("Need to implement for Task 2.1")
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
     """Convert an `ordinal` to an index in the `shape`.
-    Should ensure that enumerating position 0 ... size of a
-    tensor produces every index exactly once. It
-    may not be the inverse of `index_to_position`.
+    This function ensures that enumerating position 0 ... size of a
+    tensor produces every index exactly once. It may not be the inverse
+    of `index_to_position`.
 
     Args:
-        ordinal: ordinal position to convert.
-        shape : tensor shape.
-        out_index : return index corresponding to position.
+        ordinal (int): The ordinal position to convert.
+        shape (Shape): The shape of the tensor.
+        out_index (OutIndex): The output index corresponding to the position.
 
+    Raises:
+        ValueError: If the ordinal is out of bounds for the given shape.
     """
+    total_size = int(prod(shape))  # Calculate the total size of the tensor
+    if ordinal < 0 or ordinal >= total_size:
+        raise ValueError(f"Ordinal {ordinal} is out of bounds for shape {shape}.")
+
     for i in reversed(range(len(shape))):
         out_index[i] = ordinal % shape[i]
         ordinal //= shape[i]
-
-    # TODO: Implement for Task 2.1.
-    #raise NotImplementedError("Need to implement for Task 2.1")
 
 
 def broadcast_index(
@@ -94,20 +99,20 @@ def broadcast_index(
 
     """
     # TODO: Implement for Task 2.2.
-    
+
     padded_shape = [1] * (len(big_shape) - len(shape)) + list(shape)
-    
+
     for i in range(len(big_shape)):
         if padded_shape[i] == 1:
             out_index[i] = 0
         else:
             out_index[i] = big_index[i]
-    
+
     #raise NotImplementedError("Need to implement for Task 2.2")
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
-    """Broadcast two shapes to create a new union shape.
+    """Broadcast two shapes to create a new union shape
 
     Args:
         shape1 : first shape
@@ -115,6 +120,7 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
 
     Returns:
         broadcasted shape
+        Tensor: A new tensor with the broadcasted shape
 
     Raises:
         IndexingError : if cannot broadcast
@@ -124,14 +130,14 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
 
     shape1 = list(shape1)
     shape2 = list(shape2)
-    
+
     while len(shape1) < len(shape2):
         shape1.insert(0, 1)
     while len(shape2) < len(shape1):
         shape2.insert(0, 1)
-    
+
     broadcasted_shape = []
-    
+
     for dim1, dim2 in zip(shape1, shape2):
         if dim1 == dim2:
             broadcasted_shape.append(dim1)
@@ -141,7 +147,7 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
             broadcasted_shape.append(dim1)
         else:
             raise IndexingError(f"Shapes {shape1} and {shape2} cannot be broadcast together")
-    
+
     return tuple(broadcasted_shape)
 
     #raise NotImplementedError("Need to implement for Task 2.2")
@@ -321,7 +327,7 @@ class TensorData:
 
         new_shape = tuple(self.shape[i] for i in order)
         new_strides = tuple(self.strides[i] for i in order)
-        
+
         return TensorData(self._storage, new_shape, new_strides)
 
         # TODO: Implement for Task 2.1.

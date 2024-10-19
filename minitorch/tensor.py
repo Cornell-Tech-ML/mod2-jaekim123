@@ -99,7 +99,7 @@ class Tensor:
         Sets whether gradients should be computed for this tensor.
 
         Args:
-            x (bool): If True, gradients will be tracked for this tensor 
+            x (bool): If True, gradients will be tracked for this tensor
                     during operations. If False, gradients will not be tracked.
         """
         self.history = History()
@@ -109,7 +109,7 @@ class Tensor:
         Checks if this tensor requires gradient computation.
 
         Returns:
-            bool: True if gradients are being tracked for this tensor, 
+            bool: True if gradients are being tracked for this tensor,
                 otherwise False.
         """
         return self.history is not None
@@ -212,7 +212,7 @@ class Tensor:
         Creates a tensor filled with zeros.
 
         Args:
-            shape (Optional[UserShape]): The shape of the tensor to create. 
+            shape (Optional[UserShape]): The shape of the tensor to create.
                                         If None, a default shape will be used.
 
         Returns:
@@ -291,12 +291,12 @@ class Tensor:
         Computes the gradients of the inputs (parents) using the chain rule.
 
         Args:
-            d_output (Any): The gradient of the output with respect to some 
+            d_output (Any): The gradient of the output with respect to some
                             scalar value (typically the loss).
 
         Returns:
-            Iterable[Tuple[Variable, Any]]: A collection of tuples, where each 
-                                            tuple contains a parent variable and 
+            Iterable[Tuple[Variable, Any]]: A collection of tuples, where each
+                                            tuple contains a parent variable and
                                             its corresponding gradient contribution.
 
         Raises:
@@ -319,9 +319,9 @@ class Tensor:
         Performs backpropagation to compute gradients for all variables in the computation graph.
 
         Args:
-            grad_output (Optional[Tensor]): The gradient of the output with respect to 
-                                            the tensor. If None, the gradient is assumed 
-                                            to be 1 for scalar tensors. For non-scalar tensors, 
+            grad_output (Optional[Tensor]): The gradient of the output with respect to
+                                            the tensor. If None, the gradient is assumed
+                                            to be 1 for scalar tensors. For non-scalar tensors,
                                             `grad_output` must be provided.
 
         Raises:
@@ -369,7 +369,7 @@ class Tensor:
     def __neg__(self) -> Tensor:
         """Negates the tensor element-wise."""
         return Neg.apply(self)
-    
+
     def __radd__(self, other: TensorLike) -> Tensor:
         """Right-hand addition for scalar + tensor."""
         return self + other
@@ -377,7 +377,7 @@ class Tensor:
     def __rmul__(self, other: TensorLike) -> Tensor:
         """Right-hand multiplication for scalar * tensor."""
         return self * other
-    
+
     def all(self, dim: Optional[int] = None) -> Tensor:
         """Returns True if all elements are true along a dimension.
 
@@ -512,7 +512,7 @@ class Tensor:
     def dims(self) -> int:
         """Returns the number of dimensions of the tensor."""
         return len(self.shape)
-    
+
     def zero_grad_(self) -> None:
         """Reset the gradient to None."""
         self.grad = None
