@@ -161,7 +161,7 @@ class Mul(Function):
         grad_t1 = grad_output.f.mul_zip(grad_output, t2)  # dL/dt1 = dL/dout * t2
         grad_t2 = grad_output.f.mul_zip(grad_output, t1)  # dL/dt2 = dL/dout * t1
         return grad_t1, grad_t2
-
+    
 class Sigmoid(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor) -> Tensor:
@@ -198,7 +198,7 @@ class Sigmoid(Function):
         grad_input = grad_output * sigmoid_derivative
 
         return grad_input
-
+    
 class ReLU(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor) -> Tensor:
@@ -434,12 +434,12 @@ class Permute(Function):
         """
 
         ctx.save_for_backward(order)
-
+        
         order_list = [int(order[i]) for i in range(order.shape[0])]
 
         if len(order_list) != len(a.shape):
             raise ValueError(f"Permutation order length {len(order_list)} does not match tensor dimensions {len(a.shape)}.")
-
+        
         if sorted(order_list) != list(range(len(a.shape))):
             raise ValueError(f"Invalid permutation order: {order_list}. Must be a permutation of {list(range(len(a.shape)))}.")
 
@@ -481,7 +481,7 @@ class Permute(Function):
         zero_grad = zeros(order.shape, backend=order.backend)
 
         return grad_input, zero_grad
-
+    
 class Add(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
@@ -732,7 +732,7 @@ def grad_central_difference(
     Args:
         f (Any): The function for which the gradient is computed.
         *vals (Tensor): The input tensors to the function.
-        arg (int, optional): The index of the argument with respect to which
+        arg (int, optional): The index of the argument with respect to which 
                              the gradient is computed. Default is 0.
         epsilon (float, optional): The small increment used for finite differences. Default is 1e-6.
         ind (UserIndex): The index used to compute the gradient.
